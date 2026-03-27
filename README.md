@@ -4,6 +4,14 @@
 
 ---
 
+## Screenshots / Ekran Görüntüleri
+
+| ![Menu 1](ScreenShots/Ekran%20görüntüsü%202026-03-28%20012505.png) | ![Menu 2](ScreenShots/Ekran%20görüntüsü%202026-03-28%20012519.png) |
+| :---: | :---: |
+| ![Menu 3](ScreenShots/Ekran%20görüntüsü%202026-03-28%20012531.png) | ![Menu 4](ScreenShots/Ekran%20görüntüsü%202026-03-28%20012544.png) |
+
+---
+
 ## English
 
 WinRingLight is a high-performance, modern, and sleek screen ring light application for Windows, designed to enhance your appearance during video calls and streaming.
