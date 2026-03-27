@@ -1,0 +1,57 @@
+<Window x:Class="WinRingLight.LightWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="RingLightOverlay" 
+        WindowStyle="None" 
+        WindowState="Maximized" 
+        Topmost="True" 
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        AllowsTransparency="True"
+        Background="Transparent"
+        IsHitTestVisible="False">
+    <Grid>
+        <!-- The Light Layers (Click-Through) -->
+        <Grid x:Name="LightContainer">
+            <Grid.Effect>
+                <BlurEffect x:Name="LightBlur" Radius="0" KernelType="Gaussian"/>
+            </Grid.Effect>
+            
+            <Rectangle x:Name="FullMode" Fill="White" Visibility="Visible"/>
+            
+            <Grid x:Name="SidesMode" Visibility="Collapsed">
+                <Rectangle x:Name="SideLeft" Fill="White" HorizontalAlignment="Left" Width="300"/>
+                <Rectangle x:Name="SideRight" Fill="White" HorizontalAlignment="Right" Width="300"/>
+            </Grid>
+            
+            <Rectangle x:Name="TopMode" Fill="White" VerticalAlignment="Top" Height="300" Visibility="Collapsed"/>
+            
+            <Path x:Name="RingMode" Fill="White" Visibility="Collapsed">
+                <Path.Data>
+                    <CombinedGeometry GeometryCombineMode="Exclude">
+                        <CombinedGeometry.Geometry1>
+                            <EllipseGeometry x:Name="RingOuter" RadiusX="500" RadiusY="500" Center="960,540"/>
+                        </CombinedGeometry.Geometry1>
+                        <CombinedGeometry.Geometry2>
+                            <EllipseGeometry x:Name="RingInner" RadiusX="400" RadiusY="400" Center="960,540"/>
+                        </CombinedGeometry.Geometry2>
+                    </CombinedGeometry>
+                </Path.Data>
+            </Path>
+
+            <Path x:Name="RoundedRectMode" Fill="White" Visibility="Collapsed">
+                <Path.Data>
+                    <CombinedGeometry GeometryCombineMode="Exclude">
+                        <CombinedGeometry.Geometry1>
+                            <RectangleGeometry x:Name="RR_Outer" Rect="0,0,1920,1080"/>
+                        </CombinedGeometry.Geometry1>
+                        <CombinedGeometry.Geometry2>
+                            <RectangleGeometry x:Name="RR_Inner" Rect="100,100,1720,880" RadiusX="50" RadiusY="50"/>
+                        </CombinedGeometry.Geometry2>
+                    </CombinedGeometry>
+                </Path.Data>
+            </Path>
+        </Grid>
+        
+    </Grid>
+</Window>

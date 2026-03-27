@@ -58,54 +58,7 @@
     </Window.Resources>
 
     <Grid>
-        <!-- The Light Layers (Click-Through) -->
-        <Grid x:Name="LightContainer" IsHitTestVisible="False">
-            <Grid.Effect>
-                <BlurEffect x:Name="LightBlur" Radius="0" KernelType="Gaussian"/>
-            </Grid.Effect>
-            <!-- Full Mode -->
-            <Rectangle x:Name="FullMode" Fill="White" Visibility="Visible"/>
-            
-            <!-- Sides Mode -->
-            <Grid x:Name="SidesMode" Visibility="Collapsed">
-                <Rectangle x:Name="SideLeft" Fill="White" HorizontalAlignment="Left" Width="300"/>
-                <Rectangle x:Name="SideRight" Fill="White" HorizontalAlignment="Right" Width="300"/>
-            </Grid>
-            
-            <!-- Top Mode -->
-            <Rectangle x:Name="TopMode" Fill="White" VerticalAlignment="Top" Height="300" Visibility="Collapsed"/>
-            
-            <!-- Ring Mode -->
-            <Path x:Name="RingMode" Fill="White" Visibility="Collapsed">
-                <Path.Data>
-                    <CombinedGeometry GeometryCombineMode="Exclude">
-                        <CombinedGeometry.Geometry1>
-                            <EllipseGeometry RadiusX="500" RadiusY="500" Center="960,540"/>
-                        </CombinedGeometry.Geometry1>
-                        <CombinedGeometry.Geometry2>
-                            <EllipseGeometry RadiusX="400" RadiusY="400" Center="960,540"/>
-                        </CombinedGeometry.Geometry2>
-                    </CombinedGeometry>
-                </Path.Data>
-            </Path>
-
-            <!-- Rounded Rect Mode -->
-            <Path x:Name="RoundedRectMode" Fill="White" Visibility="Collapsed">
-                <Path.Data>
-                    <CombinedGeometry GeometryCombineMode="Exclude">
-                        <CombinedGeometry.Geometry1>
-                            <RectangleGeometry x:Name="RR_Outer" Rect="0,0,1920,1080"/>
-                        </CombinedGeometry.Geometry1>
-                        <CombinedGeometry.Geometry2>
-                            <RectangleGeometry x:Name="RR_Inner" Rect="100,100,1720,880" RadiusX="50" RadiusY="50"/>
-                        </CombinedGeometry.Geometry2>
-                    </CombinedGeometry>
-                </Path.Data>
-            </Path>
-        </Grid>
-        
-        <!-- Brightness Overlay (Black cover to dim the light) -->
-        <Rectangle x:Name="BrightnessOverlay" Fill="Black" Opacity="0" IsHitTestVisible="False" />
+        <!-- The Window is now just a transparent host for the Control Panel -->
 
         <!-- Control Panel (Dark Mode) -->
         <Border x:Name="ControlPanel" 

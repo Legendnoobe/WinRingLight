@@ -19,3 +19,10 @@ C:\MyProjects\AntigravityProjects\WinRingLight\obj\Debug\net8.0-windows\WinRingL
 C:\MyProjects\AntigravityProjects\WinRingLight\obj\Debug\net8.0-windows\WinRingLight.genruntimeconfig.cache
 C:\MyProjects\AntigravityProjects\WinRingLight\obj\Debug\net8.0-windows\ref\WinRingLight.dll
 C:\MyProjects\AntigravityProjects\WinRingLight\obj\Debug\net8.0-windows\WinRingLight.sourcelink.json
+C:\MyProjects\AntigravityProjects\WinRingLight\obj\Debug\net8.0-windows\LightWindow.baml
+C:\MyProjects\AntigravityProjects\WinRingLight\obj\Debug\net8.0-windows\LightWindow.g.cs
+C:\MyProjects\AntigravityProjects\WinRingLight\bin\Debug\net8.0-windows\System.CodeDom.dll
+C:\MyProjects\AntigravityProjects\WinRingLight\bin\Debug\net8.0-windows\System.Management.dll
+C:\MyProjects\AntigravityProjects\WinRingLight\bin\Debug\net8.0-windows\runtimes\win\lib\net8.0\System.Management.dll
+C:\MyProjects\AntigravityProjects\WinRingLight\obj\Debug\net8.0-windows\WinRingLight.csproj.AssemblyReference.cache
+C:\MyProjects\AntigravityProjects\WinRingLight\obj\Debug\net8.0-windows\WinRingL.058C804D.Up2Date

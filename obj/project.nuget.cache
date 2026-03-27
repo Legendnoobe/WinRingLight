@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "EOiMSjdFL44=",
+  "dgSpecHash": "/GfzmuxpSMw=",
   "success": true,
   "projectFilePath": "C:\\MyProjects\\AntigravityProjects\\WinRingLight\\WinRingLight.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\trozg\\.nuget\\packages\\system.codedom\\10.0.5\\system.codedom.10.0.5.nupkg.sha512",
+    "C:\\Users\\trozg\\.nuget\\packages\\system.management\\10.0.5\\system.management.10.0.5.nupkg.sha512"
+  ],
   "logs": []
 }
