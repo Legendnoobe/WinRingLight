@@ -1,8 +1,10 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Interop;
 
 namespace WinRingLight;
 
@@ -13,6 +15,14 @@ public partial class MainWindow : Window
     private string _currentMode = "Ring";
     private LightWindow _lightWindow;
 
+    // Global Hotkey (V20)
+    [DllImport("user32.dll")]
+    private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
+    [DllImport("user32.dll")]
+    private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+    private const int HOTKEY_ID = 9000;
+    private const uint VK_H = 0x48;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -21,22 +31,43 @@ public partial class MainWindow : Window
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        // Start the click-through light window
         _lightWindow = new LightWindow();
         _lightWindow.Show();
         
-        // Fix Z-Order (V16): MainWindow (Panel) owned by LightWindow (Overlay)
-        // In WPF, the owned window is ALWAYS in front of the owner.
+        // Removed LogoWindow for V21 simplification
+
         this.Owner = _lightWindow; 
         this.Topmost = true;
         this.Activate();
 
+        // Register Global Hotkey for 'H' (V20)
+        var helper = new WindowInteropHelper(this);
+        RegisterHotKey(helper.Handle, HOTKEY_ID, 0, VK_H); 
+        HwndSource source = HwndSource.FromHwnd(helper.Handle);
+        source.AddHook(HwndHook);
+
         _isInitialized = true;
-        
-        // Finalized Defaults (V13)
         SetMode("Ring"); 
         UpdateLanguage();
         SyncLight();
+    }
+
+    private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        const int WM_HOTKEY = 0x0312;
+        if (msg == WM_HOTKEY && wParam.ToInt32() == HOTKEY_ID)
+        {
+            ToggleControlPanel();
+            handled = true;
+        }
+        return IntPtr.Zero;
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        var helper = new WindowInteropHelper(this);
+        UnregisterHotKey(helper.Handle, HOTKEY_ID);
+        base.OnClosed(e);
     }
 
     private void SyncLight()
@@ -62,22 +93,19 @@ public partial class MainWindow : Window
             result,
             ThicknessSlider.Value,
             OpacitySlider.Value,
-            SoftnessSlider.Value
+            SoftnessSlider.Value,
+            CornerRadiusSlider.Value
         );
 
-        // System Brightness (0.9 limit mapped to 0-100)
         int sysBrightness = (int)(BrightnessSlider.Value / 0.9 * 100);
         BrightnessHelper.SetBrightness(sysBrightness);
     }
 
-    private Color Interpolate(Color c1, Color c2, double t)
-    {
-        return Color.FromRgb(
+    private Color Interpolate(Color c1, Color c2, double t) => Color.FromRgb(
             (byte)(c1.R + (c2.R - c1.R) * t),
             (byte)(c1.G + (c2.G - c1.G) * t),
             (byte)(c1.B + (c2.B - c1.B) * t)
         );
-    }
 
     private void SwitchLanguage_Click(object sender, RoutedEventArgs e)
     {
@@ -138,28 +166,25 @@ public partial class MainWindow : Window
         if (ControlPanel.Visibility == Visibility.Visible)
         {
             var anim = new System.Windows.Media.Animation.DoubleAnimation(0, TimeSpan.FromSeconds(0.3));
-            anim.Completed += (s, e) => ControlPanel.Visibility = Visibility.Collapsed;
+            anim.Completed += (s, e) => {
+                ControlPanel.Visibility = Visibility.Collapsed;
+            };
             ControlPanel.BeginAnimation(UIElement.OpacityProperty, anim);
         }
         else
         {
             ControlPanel.Visibility = Visibility.Visible;
+            this.Topmost = true;
+            this.Activate(); 
             var anim = new System.Windows.Media.Animation.DoubleAnimation(1, TimeSpan.FromSeconds(0.3));
             ControlPanel.BeginAnimation(UIElement.OpacityProperty, anim);
         }
     }
 
-    private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-        SyncLight();
-    }
-
+    private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) => SyncLight();
     private void Mode_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is string mode)
-        {
-            SetMode(mode);
-        }
+        if (sender is Button btn && btn.Tag is string mode) SetMode(mode);
     }
 
     private void SetMode(string mode)
@@ -172,7 +197,6 @@ public partial class MainWindow : Window
     private void UpdateSliderVisibility()
     {
         if (!_isInitialized) return;
-
         if (ThicknessGroup != null) ThicknessGroup.Visibility = Visibility.Visible;
         if (SoftnessGroup != null) SoftnessGroup.Visibility = Visibility.Visible;
         if (CornerGroup != null) CornerGroup.Visibility = Visibility.Collapsed;
@@ -190,7 +214,6 @@ public partial class MainWindow : Window
     }
 
     private void Exit_Click(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
-
     private void ControlPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (e.LeftButton == MouseButtonState.Pressed) this.DragMove();

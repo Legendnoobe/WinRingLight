@@ -118,22 +118,22 @@
                                     </LinearGradientBrush>
                                 </Border.Background>
                             </Border>
-                            <Slider x:Name="ColorSlider" Minimum="0" Maximum="1" Value="0.5" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center"/>
+                            <Slider x:Name="ColorSlider" Minimum="0" Maximum="1" Value="0.5" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center"/>
                         </Grid>
                         
                         <StackPanel x:Name="BrightnessGroup">
                             <TextBlock x:Name="BrightnessText" Text="Brightness (Dimmer)" FontSize="10" Foreground="#66FFFFFF" Margin="0,4,0,2"/>
-                            <Slider x:Name="BrightnessSlider" Minimum="0" Maximum="0.9" Value="0.9" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
+                            <Slider x:Name="BrightnessSlider" Minimum="0" Maximum="0.9" Value="0.9" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
                         </StackPanel>
                         
                         <StackPanel x:Name="OpacityGroup">
                             <TextBlock x:Name="OpacityText" Text="Intensity (Solid)" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
-                            <Slider x:Name="OpacitySlider" Minimum="0" Maximum="1.0" Value="1.0" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
+                            <Slider x:Name="OpacitySlider" Minimum="0" Maximum="1.0" Value="1.0" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
                         </StackPanel>
 
                         <StackPanel x:Name="SoftnessGroup">
                             <TextBlock x:Name="SoftnessText" Text="Softness (Blur)" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
-                            <Slider x:Name="SoftnessSlider" Minimum="0" Maximum="1" Value="0.1" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
+                            <Slider x:Name="SoftnessSlider" Minimum="0" Maximum="1" Value="0.1" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
                         </StackPanel>
                     </StackPanel>
 
@@ -155,11 +155,11 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel x:Name="ThicknessGroup" Margin="0,0,5,0">
                                 <TextBlock x:Name="ThicknessText" Text="Thickness" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
-                                <Slider x:Name="ThicknessSlider" Minimum="0.05" Maximum="1.0" Value="0.4" ValueChanged="Slider_ValueChanged"/>
+                                <Slider x:Name="ThicknessSlider" Minimum="0.05" Maximum="1.0" Value="0.4" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged"/>
                             </StackPanel>
                             <StackPanel x:Name="CornerGroup" Grid.Column="1" Margin="5,0,0,0">
                                 <TextBlock x:Name="CornerText" Text="Corner Radius" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
-                                <Slider x:Name="CornerRadiusSlider" Minimum="0" Maximum="1.0" Value="0.2" ValueChanged="Slider_ValueChanged"/>
+                                <Slider x:Name="CornerRadiusSlider" Minimum="0" Maximum="1.0" Value="0.2" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>

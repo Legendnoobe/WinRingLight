@@ -1,0 +1,15 @@
+<Window x:Class="WinRingLight.LogoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="LogoWindow" Height="64" Width="64"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="True" ShowInTaskbar="False"
+        HorizontalAlignment="Left" VerticalAlignment="Top"
+        Left="40" Top="40">
+    <Grid Cursor="Hand" MouseLeftButtonDown="Logo_MouseLeftButtonDown">
+        <Grid ClipToBounds="True">
+            <!-- Height is 80 to show squares but hide text from logo.png -->
+            <Image x:Name="LogoImage" Stretch="UniformToFill" VerticalAlignment="Top" Height="80" Width="64"/>
+        </Grid>
+    </Grid>
+</Window>
