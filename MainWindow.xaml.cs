@@ -11,6 +11,8 @@ public partial class MainWindow : Window
 {
     private string _currentColor = "#FFFFFF";
     private bool _isInitialized = false;
+    private string _currentLang = "EN";
+    private string _currentMode = "Ring";
 
     public MainWindow()
     {
@@ -22,6 +24,10 @@ public partial class MainWindow : Window
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         _isInitialized = true;
+        
+        // Finalized Defaults (V11)
+        SetMode("Ring"); 
+        UpdateLanguage();
         UpdateGeometries();
         UpdateColorFromSlider(); 
         UpdateOpacity();
@@ -33,15 +39,64 @@ public partial class MainWindow : Window
         if (_isInitialized) UpdateGeometries();
     }
 
+    private void SwitchLanguage_Click(object sender, RoutedEventArgs e)
+    {
+        _currentLang = (_currentLang == "EN") ? "TR" : "EN";
+        UpdateLanguage();
+    }
+
+    private void UpdateLanguage()
+    {
+        if (_currentLang == "EN")
+        {
+            TitleText.Text = "Windows RingLight";
+            LangBtn.Content = "TR";
+            ExitBtn.Content = "Exit";
+            ColorText.Text = "Color Temperature";
+            BrightnessText.Text = "Brightness (Dimmer)";
+            OpacityText.Text = "Intensity (Solidness)"; 
+            SoftnessText.Text = "Softness (Glow)"; 
+            ModesText.Text = "Light Mode & Size";
+            ModeFullBtn.Content = "Full";
+            ModeSidesBtn.Content = "Sides";
+            ModeTopBtn.Content = "Top";
+            ModeRingBtn.Content = "Ring";
+            ModeRectBtn.Content = "Frame";
+            ThicknessText.Text = "Thickness";
+            CornerText.Text = "Corner Radius";
+            ShortcutText.Text = "Shortcuts: 'H' (Hide), 'Esc' (Exit) | Click-through active";
+        }
+        else
+        {
+            TitleText.Text = "Windows RingLight";
+            LangBtn.Content = "EN";
+            ExitBtn.Content = "Kapat";
+            ColorText.Text = "Renk Sıcaklığı";
+            BrightnessText.Text = "Parlaklık (Dimmer)";
+            OpacityText.Text = "Işık Şiddeti (Matlık)"; 
+            SoftnessText.Text = "Yumuşaklık (Işıltı)"; 
+            ModesText.Text = "Işık Modu & Boyut";
+            ModeFullBtn.Content = "Tam";
+            ModeSidesBtn.Content = "Yanlar";
+            ModeTopBtn.Content = "Üst";
+            ModeRingBtn.Content = "Halka";
+            ModeRectBtn.Content = "Çerçeve";
+            ThicknessText.Text = "Kalınlık";
+            CornerText.Text = "Köşe Kavisi";
+            ShortcutText.Text = "Kısayollar: 'H' (Gizle), 'Esc' (Çıkış) | Ekrana tıklayabilirsiniz";
+        }
+    }
+
     private void UpdateGeometries()
     {
         if (!_isInitialized) return;
 
         double factor = ThicknessSlider?.Value ?? 0.5;
         
-        // Update Bars
-        double sideWidth = this.ActualWidth * 0.4 * factor;
-        double topHeight = this.ActualHeight * 0.4 * factor;
+        // Standard "Right = More" Logic:
+        // Bars expand from edges
+        double sideWidth = this.ActualWidth * 0.45 * factor;
+        double topHeight = this.ActualHeight * 0.45 * factor;
 
         if (SideLeft != null) SideLeft.Width = sideWidth;
         if (SideRight != null) SideRight.Width = sideWidth;
@@ -49,30 +104,37 @@ public partial class MainWindow : Window
 
         UpdateRingGeometry();
         UpdateRoundedRectGeometry();
-        UpdateBlur();
     }
 
     private void UpdateRingGeometry()
     {
         if (RingMode == null) return;
 
-        double centerX = this.ActualWidth / 2;
-        double centerY = this.ActualHeight / 2;
+        double width = this.ActualWidth;
+        double height = this.ActualHeight;
+        double centerX = width / 2;
+        double centerY = height / 2;
         
-        double baseRadius = Math.Min(this.ActualWidth, this.ActualHeight) * 0.48;
-        double thicknessFactor = ThicknessSlider?.Value ?? 0.5;
+        double minDim = Math.Min(width, height);
+        double midRadius = minDim * 0.35; // Center point of the ring line
+        double factor = ThicknessSlider?.Value ?? 0.4;
         
-        // Higher Slider = Thicker Ring = Smaller Inner Radius
-        double innerRadius = baseRadius * (1.0 - thicknessFactor);
-        innerRadius = Math.Max(0, Math.Min(baseRadius * 0.98, innerRadius));
+        // Dual-Direction Growth (V11): Expands both outwards and inwards
+        double ringThickness = minDim * 0.45 * factor;
+        double outerRadius = midRadius + (ringThickness / 2);
+        double innerRadius = midRadius - (ringThickness / 2);
+
+        // Safety clamps
+        outerRadius = Math.Max(10, outerRadius);
+        innerRadius = Math.Max(0, innerRadius);
 
         if (RingMode.Data is CombinedGeometry combined)
         {
             if (combined.Geometry1 is EllipseGeometry outer)
             {
                 outer.Center = new Point(centerX, centerY);
-                outer.RadiusX = baseRadius;
-                outer.RadiusY = baseRadius;
+                outer.RadiusX = outerRadius;
+                outer.RadiusY = outerRadius;
             }
             if (combined.Geometry2 is EllipseGeometry inner)
             {
@@ -90,9 +152,9 @@ public partial class MainWindow : Window
         double width = this.ActualWidth;
         double height = this.ActualHeight;
         
-        double thicknessFactor = ThicknessSlider?.Value ?? 0.5;
-        // Corrected: Right (1.0) = Thick, Left (0.05) = Thin
-        double margin = (width * 0.4) * (1.0 - thicknessFactor); 
+        double factor = ThicknessSlider?.Value ?? 0.4;
+        // Right (1.0) = Smaller margin = Thicker
+        double margin = (width * 0.45) * (1.1 - factor); 
         margin = Math.Max(0, margin);
 
         double radiusFactor = CornerRadiusSlider?.Value ?? 0.2;
@@ -108,8 +170,8 @@ public partial class MainWindow : Window
     {
         if (LightBlur != null && SoftnessSlider != null)
         {
-            // Blur radius 0 to 80
-            LightBlur.Radius = SoftnessSlider.Value * 80;
+            // Right (1.0) = Maximum Glow
+            LightBlur.Radius = SoftnessSlider.Value * 120; // Increased range for better "faint" look
         }
     }
 
@@ -141,6 +203,7 @@ public partial class MainWindow : Window
         
         if (sender == BrightnessSlider)
         {
+            // Right (0.9) = Brighter (Lower overlay opacity)
             BrightnessOverlay.Opacity = 0.9 - BrightnessSlider.Value;
         }
         else if (sender == ColorSlider)
@@ -165,6 +228,7 @@ public partial class MainWindow : Window
     {
         if (LightContainer != null && OpacitySlider != null)
         {
+            // Right (1.0) = Opaque/Solid (1.0)
             LightContainer.Opacity = OpacitySlider.Value;
         }
     }
@@ -176,7 +240,7 @@ public partial class MainWindow : Window
         double val = ColorSlider.Value;
         Color warm = (Color)ColorConverter.ConvertFromString("#FFFFA4");
         Color neutral = (Color)ColorConverter.ConvertFromString("#FFFFFF");
-        Color cool = (Color)ColorConverter.ConvertFromString("#D9EFFF");
+        Color cool = (Color)ColorConverter.ConvertFromString("#58B0FF");
 
         Color result;
         if (val < 0.5)
@@ -228,6 +292,7 @@ public partial class MainWindow : Window
 
     private void SetMode(string mode)
     {
+        _currentMode = mode;
         FullMode.Visibility = Visibility.Collapsed;
         SidesMode.Visibility = Visibility.Collapsed;
         TopMode.Visibility = Visibility.Collapsed;
@@ -241,6 +306,29 @@ public partial class MainWindow : Window
             case "Top": TopMode.Visibility = Visibility.Visible; break;
             case "Ring": RingMode.Visibility = Visibility.Visible; break;
             case "RoundedRect": RoundedRectMode.Visibility = Visibility.Visible; break;
+        }
+
+        UpdateSliderVisibility();
+        UpdateGeometries();
+    }
+
+    private void UpdateSliderVisibility()
+    {
+        if (!_isInitialized) return;
+
+        if (ThicknessGroup != null) ThicknessGroup.Visibility = Visibility.Visible;
+        if (SoftnessGroup != null) SoftnessGroup.Visibility = Visibility.Visible;
+        if (CornerGroup != null) CornerGroup.Visibility = Visibility.Collapsed;
+
+        switch (_currentMode)
+        {
+            case "Full":
+                if (ThicknessGroup != null) ThicknessGroup.Visibility = Visibility.Collapsed;
+                if (SoftnessGroup != null) SoftnessGroup.Visibility = Visibility.Collapsed;
+                break;
+            case "RoundedRect":
+                if (CornerGroup != null) CornerGroup.Visibility = Visibility.Visible;
+                break;
         }
     }
 

@@ -136,9 +136,13 @@
                                 <Border Background="#FFFFE0" CornerRadius="2" Margin="1" Width="10" Height="10"/>
                             </UniformGrid>
                         </Viewbox>
-                        <TextBlock Text="Windows RingLight" FontSize="16" FontWeight="SemiBold" Foreground="#FFFFFFFF" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TitleText" Text="Windows RingLight" FontSize="16" FontWeight="SemiBold" Foreground="#FFFFFFFF" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <Button Content="Kapat" Click="Exit_Click" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Foreground="#AAFFFFFF" FontSize="11"/>
+                    
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="LangBtn" Content="TR" Click="SwitchLanguage_Click" Background="Transparent" BorderThickness="0" Foreground="#AAFFFFFF" FontSize="11" Margin="0,0,10,0"/>
+                        <Button x:Name="ExitBtn" Content="Exit" Click="Exit_Click" Background="Transparent" BorderThickness="0" Foreground="#AAFFFFFF" FontSize="11"/>
+                    </StackPanel>
                 </Grid>
                 
                 <Grid>
@@ -149,7 +153,7 @@
 
                     <!-- Left: Colors & Basic Controls -->
                     <StackPanel Grid.Column="0" Margin="0,0,15,0">
-                        <TextBlock Text="Renk Sıcaklığı" FontSize="11" Foreground="#99FFFFFF" Margin="0,0,0,6"/>
+                        <TextBlock x:Name="ColorText" Text="Color Temperature" FontSize="11" Foreground="#99FFFFFF" Margin="0,0,0,6"/>
                         
                         <Grid Margin="0,0,0,10">
                             <Border Height="4" VerticalAlignment="Center" CornerRadius="2" Margin="5,0">
@@ -157,32 +161,38 @@
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                         <GradientStop Color="#FFFFA4" Offset="0"/>
                                         <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                        <GradientStop Color="#D9EFFF" Offset="1"/>
+                                        <GradientStop Color="#58B0FF" Offset="1"/>
                                     </LinearGradientBrush>
                                 </Border.Background>
                             </Border>
                             <Slider x:Name="ColorSlider" Minimum="0" Maximum="1" Value="0.5" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center"/>
                         </Grid>
                         
-                        <TextBlock Text="Parlaklık (Dimmer)" FontSize="10" Foreground="#66FFFFFF" Margin="0,4,0,2"/>
-                        <Slider x:Name="BrightnessSlider" Minimum="0" Maximum="0.9" Value="0.9" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
+                        <StackPanel x:Name="BrightnessGroup">
+                            <TextBlock x:Name="BrightnessText" Text="Brightness (Dimmer)" FontSize="10" Foreground="#66FFFFFF" Margin="0,4,0,2"/>
+                            <Slider x:Name="BrightnessSlider" Minimum="0" Maximum="0.9" Value="0.9" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
+                        </StackPanel>
                         
-                        <TextBlock Text="Saydamlık (Opacity)" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
-                        <Slider x:Name="OpacitySlider" Minimum="0.1" Maximum="1.0" Value="1.0" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
+                        <StackPanel x:Name="OpacityGroup">
+                            <TextBlock x:Name="OpacityText" Text="Intensity (Solid)" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
+                            <Slider x:Name="OpacitySlider" Minimum="0" Maximum="1.0" Value="1.0" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
+                        </StackPanel>
 
-                        <TextBlock Text="Yumuşaklık (Softness/Blur)" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
-                        <Slider x:Name="SoftnessSlider" Minimum="0" Maximum="1" Value="0.2" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
+                        <StackPanel x:Name="SoftnessGroup">
+                            <TextBlock x:Name="SoftnessText" Text="Softness (Blur)" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
+                            <Slider x:Name="SoftnessSlider" Minimum="0" Maximum="1" Value="0.1" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
+                        </StackPanel>
                     </StackPanel>
 
                     <!-- Right: Advanced Modes & Size -->
                     <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                        <TextBlock Text="Işık Modu &amp; Boyut" FontSize="11" Foreground="#99FFFFFF" Margin="0,0,0,6"/>
+                        <TextBlock x:Name="ModesText" Text="Light Mode &amp; Size" FontSize="11" Foreground="#99FFFFFF" Margin="0,0,0,6"/>
                         <UniformGrid Columns="5" Margin="0,0,0,12">
-                            <Button Content="Tam" Click="Mode_Click" Tag="Full" Style="{StaticResource ModeButtonStyle}"/>
-                            <Button Content="Yanlar" Click="Mode_Click" Tag="Sides" Style="{StaticResource ModeButtonStyle}"/>
-                            <Button Content="Üst" Click="Mode_Click" Tag="Top" Style="{StaticResource ModeButtonStyle}"/>
-                            <Button Content="Halka" Click="Mode_Click" Tag="Ring" Style="{StaticResource ModeButtonStyle}"/>
-                            <Button Content="Dörtgen" Click="Mode_Click" Tag="RoundedRect" Style="{StaticResource ModeButtonStyle}"/>
+                            <Button x:Name="ModeFullBtn" Content="Full" Click="Mode_Click" Tag="Full" Style="{StaticResource ModeButtonStyle}"/>
+                            <Button x:Name="ModeSidesBtn" Content="Sides" Click="Mode_Click" Tag="Sides" Style="{StaticResource ModeButtonStyle}"/>
+                            <Button x:Name="ModeTopBtn" Content="Top" Click="Mode_Click" Tag="Top" Style="{StaticResource ModeButtonStyle}"/>
+                            <Button x:Name="ModeRingBtn" Content="Ring" Click="Mode_Click" Tag="Ring" Style="{StaticResource ModeButtonStyle}"/>
+                            <Button x:Name="ModeRectBtn" Content="Frame" Click="Mode_Click" Tag="RoundedRect" Style="{StaticResource ModeButtonStyle}"/>
                         </UniformGrid>
 
                         <Grid>
@@ -190,12 +200,12 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <StackPanel Margin="0,0,5,0">
-                                <TextBlock Text="Kalınlık (Thickness)" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
-                                <Slider x:Name="ThicknessSlider" Minimum="0.05" Maximum="1.0" Value="0.5" ValueChanged="Slider_ValueChanged"/>
+                            <StackPanel x:Name="ThicknessGroup" Margin="0,0,5,0">
+                                <TextBlock x:Name="ThicknessText" Text="Thickness" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
+                                <Slider x:Name="ThicknessSlider" Minimum="0.05" Maximum="1.0" Value="0.4" ValueChanged="Slider_ValueChanged"/>
                             </StackPanel>
-                            <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                                <TextBlock Text="Köşe Kavisi" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
+                            <StackPanel x:Name="CornerGroup" Grid.Column="1" Margin="5,0,0,0">
+                                <TextBlock x:Name="CornerText" Text="Corner Radius" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
                                 <Slider x:Name="CornerRadiusSlider" Minimum="0" Maximum="1.0" Value="0.2" ValueChanged="Slider_ValueChanged"/>
                             </StackPanel>
                         </Grid>
@@ -203,7 +213,7 @@
                 </Grid>
 
                 <Separator Background="#22FFFFFF" Margin="0,15,0,10"/>
-                <TextBlock Text="Kısayollar: 'H' (Gizle), 'Esc' (Çıkış) | Ekrana tıklayabilirsiniz" FontSize="10" Foreground="#44FFFFFF" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="ShortcutText" Text="Shortcuts: 'H' (Hide), 'Esc' (Exit) | Click-through active" FontSize="10" Foreground="#44FFFFFF" HorizontalAlignment="Center"/>
             </StackPanel>
         </Border>
     </Grid>
