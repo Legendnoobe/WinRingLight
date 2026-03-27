@@ -41,8 +41,8 @@ WinRingLight is a high-performance, modern, and sleek screen ring light applicat
 ### 🚀 Installation
 
 Find the executables in the `publish` folder:
-1. **Portable**: `publish\Portable\WinRingLight.exe` (~170 MB) - Self-contained, runs anywhere.
-2. **Lightweight**: `publish\Lightweight\WinRingLight.exe` (<1 MB) - Requires .NET 8 Runtime.
+1. **Portable**:    (~170 MB) - Self-contained, runs anywhere.
+2. **Standard**: (<1 MB) - Requires .NET 8 Runtime.
 
 ---
 
@@ -75,8 +75,8 @@ WinRingLight, Windows için geliştirilmiş, görüntülü görüşmelerde ve ya
 ### 🚀 Kurulum
 
 `publish` klasörü altındaki sürümlerden birini seçebilirsiniz:
-1. **Portable**: `publish\Portable\WinRingLight.exe` (~170 MB) - Hiçbir kurulum gerektirmez, direkt çalışır.
-2. **Lightweight**: `publish\Lightweight\WinRingLight.exe` (<1 MB) - Çalışması için .NET 8 yüklü olmalıdır.
+1. **Portable**:  (~170 MB) - Hiçbir kurulum gerektirmez, direkt çalışır.
+2. **Standard**:  (<1 MB) - Çalışması için .NET 8 yüklü olmalıdır.
 
 ---
 
