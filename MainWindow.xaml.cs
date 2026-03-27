@@ -34,11 +34,12 @@ public partial class MainWindow : Window
         _lightWindow = new LightWindow();
         _lightWindow.Show();
         
-        // Removed LogoWindow for V21 simplification
-
         this.Owner = _lightWindow; 
         this.Topmost = true;
         this.Activate();
+
+        // Catch clicks for "Double-Click Away" only when menu is open (V22)
+        RootGrid.Background = Brushes.Transparent; 
 
         // Register Global Hotkey for 'H' (V20)
         var helper = new WindowInteropHelper(this);
@@ -68,6 +69,19 @@ public partial class MainWindow : Window
         var helper = new WindowInteropHelper(this);
         UnregisterHotKey(helper.Handle, HOTKEY_ID);
         base.OnClosed(e);
+    }
+
+    private void WindowGrid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        // Double-Click Away to Hide (V22)
+        if (e.ClickCount == 2 && ControlPanel.Visibility == Visibility.Visible)
+        {
+            // Only hide if the click was ON the transparent grid, not on the control panel
+            if (e.OriginalSource == RootGrid)
+            {
+                ToggleControlPanel();
+            }
+        }
     }
 
     private void SyncLight()
@@ -168,12 +182,14 @@ public partial class MainWindow : Window
             var anim = new System.Windows.Media.Animation.DoubleAnimation(0, TimeSpan.FromSeconds(0.3));
             anim.Completed += (s, e) => {
                 ControlPanel.Visibility = Visibility.Collapsed;
+                RootGrid.Background = null; // Disable hit-testing when closed
             };
             ControlPanel.BeginAnimation(UIElement.OpacityProperty, anim);
         }
         else
         {
             ControlPanel.Visibility = Visibility.Visible;
+            RootGrid.Background = Brushes.Transparent; // Enable hit-testing when open
             this.Topmost = true;
             this.Activate(); 
             var anim = new System.Windows.Media.Animation.DoubleAnimation(1, TimeSpan.FromSeconds(0.3));

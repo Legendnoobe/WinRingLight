@@ -1,0 +1,22 @@
+# .gitignore for WinRingLight
+
+# Build Output
+bin/
+obj/
+publish/
+
+# IDE files
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Windows files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# User assets (If they should be kept local)
+# logo.png

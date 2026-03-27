@@ -57,7 +57,7 @@
         </Style>
     </Window.Resources>
 
-    <Grid>
+    <Grid x:Name="RootGrid" Background="Transparent" MouseLeftButtonDown="WindowGrid_MouseLeftButtonDown">
         <!-- The Window is now just a transparent host for the Control Panel -->
 
         <!-- Control Panel (Dark Mode) -->
