@@ -20,8 +20,16 @@ public partial class MainWindow : Window
     private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
     [DllImport("user32.dll")]
     private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
+
+    private const uint WDA_NONE = 0x00;
+    private const uint WDA_EXCLUDEFROMCAPTURE = 0x11;
+    private const uint MOD_ALT = 0x0001; // Alt modifier
     private const int HOTKEY_ID = 9000;
+    private const int HOTKEY_LIGHT_ID = 9001;
     private const uint VK_H = 0x48;
+    private const uint VK_L = 0x4C;
 
     public MainWindow()
     {
@@ -34,16 +42,20 @@ public partial class MainWindow : Window
         _lightWindow = new LightWindow();
         _lightWindow.Show();
         
-        this.Owner = _lightWindow; 
+        // Ensure menu always stays on top of the light (V26)
+        this.Owner = _lightWindow;
+        
         this.Topmost = true;
-        this.Activate();
+        
+        // Position at bottom center of screen
+        var desktopWorkingArea = SystemParameters.WorkArea;
+        this.Left = (desktopWorkingArea.Width - this.ActualWidth) / 2;
+        this.Top = desktopWorkingArea.Height - this.ActualHeight - 20;
 
-        // Catch clicks for "Double-Click Away" only when menu is open (V22)
-        RootGrid.Background = Brushes.Transparent; 
-
-        // Register Global Hotkey for 'H' (V20)
+        // Register Global Hotkeys with Alt Modifier (V24)
         var helper = new WindowInteropHelper(this);
-        RegisterHotKey(helper.Handle, HOTKEY_ID, 0, VK_H); 
+        RegisterHotKey(helper.Handle, HOTKEY_ID, MOD_ALT, VK_H); 
+        RegisterHotKey(helper.Handle, HOTKEY_LIGHT_ID, MOD_ALT, VK_L); 
         HwndSource source = HwndSource.FromHwnd(helper.Handle);
         source.AddHook(HwndHook);
 
@@ -51,15 +63,28 @@ public partial class MainWindow : Window
         SetMode("Ring"); 
         UpdateLanguage();
         SyncLight();
+        
+        this.Visibility = Visibility.Visible;
+        this.Activate();
     }
+
+
 
     private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
         const int WM_HOTKEY = 0x0312;
-        if (msg == WM_HOTKEY && wParam.ToInt32() == HOTKEY_ID)
+        if (msg == WM_HOTKEY)
         {
-            ToggleControlPanel();
-            handled = true;
+            if (wParam.ToInt32() == HOTKEY_ID)
+            {
+                ToggleControlPanel();
+                handled = true;
+            }
+            else if (wParam.ToInt32() == HOTKEY_LIGHT_ID)
+            {
+                ToggleLight();
+                handled = true;
+            }
         }
         return IntPtr.Zero;
     }
@@ -68,20 +93,8 @@ public partial class MainWindow : Window
     {
         var helper = new WindowInteropHelper(this);
         UnregisterHotKey(helper.Handle, HOTKEY_ID);
+        UnregisterHotKey(helper.Handle, HOTKEY_LIGHT_ID);
         base.OnClosed(e);
-    }
-
-    private void WindowGrid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        // Double-Click Away to Hide (V22)
-        if (e.ClickCount == 2 && ControlPanel.Visibility == Visibility.Visible)
-        {
-            // Only hide if the click was ON the transparent grid, not on the control panel
-            if (e.OriginalSource == RootGrid)
-            {
-                ToggleControlPanel();
-            }
-        }
     }
 
     private void SyncLight()
@@ -146,7 +159,8 @@ public partial class MainWindow : Window
             ModeRectBtn.Content = "Frame";
             ThicknessText.Text = "Thickness";
             CornerText.Text = "Corner Radius";
-            ShortcutText.Text = "Shortcuts: 'H' (Hide), 'Esc' (Exit) | Click-through active";
+            CaptureCheckBox.Content = "Hide from Screen Capture";
+            ShortcutText.Text = "Shortcuts: 'Alt+H' (Panel), 'Alt+L' (Light), 'Esc' (Exit)";
         }
         else
         {
@@ -165,35 +179,46 @@ public partial class MainWindow : Window
             ModeRectBtn.Content = "Çerçeve";
             ThicknessText.Text = "Kalınlık";
             CornerText.Text = "Köşe Kavisi";
-            ShortcutText.Text = "Kısayollar: 'H' (Gizle), 'Esc' (Çıkış) | Ekrana tıklayabilirsiniz";
+            CaptureCheckBox.Content = "Ekran Kaydında Gizle";
+            ShortcutText.Text = "Kısayollar: 'Alt+H' (Panel), 'Alt+L' (Işık), 'Esc' (Çıkış)";
         }
     }
 
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Escape) Application.Current.Shutdown();
-        else if (e.Key == Key.H) ToggleControlPanel();
+        if (e.Key == Key.Escape) 
+        {
+            e.Handled = true;
+            Application.Current.Shutdown();
+        }
     }
 
     private void ToggleControlPanel()
     {
-        if (ControlPanel.Visibility == Visibility.Visible)
+        if (this.Visibility == Visibility.Visible)
         {
-            var anim = new System.Windows.Media.Animation.DoubleAnimation(0, TimeSpan.FromSeconds(0.3));
-            anim.Completed += (s, e) => {
-                ControlPanel.Visibility = Visibility.Collapsed;
-                RootGrid.Background = null; // Disable hit-testing when closed
-            };
-            ControlPanel.BeginAnimation(UIElement.OpacityProperty, anim);
+            this.Visibility = Visibility.Collapsed;
         }
         else
         {
-            ControlPanel.Visibility = Visibility.Visible;
-            RootGrid.Background = Brushes.Transparent; // Enable hit-testing when open
+            this.Visibility = Visibility.Visible;
             this.Topmost = true;
             this.Activate(); 
-            var anim = new System.Windows.Media.Animation.DoubleAnimation(1, TimeSpan.FromSeconds(0.3));
-            ControlPanel.BeginAnimation(UIElement.OpacityProperty, anim);
+        }
+    }
+
+    private void ToggleLight()
+    {
+        if (_lightWindow == null) return;
+
+        if (_lightWindow.Visibility == Visibility.Visible)
+        {
+            _lightWindow.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+            _lightWindow.Visibility = Visibility.Visible;
+            _lightWindow.Topmost = true; // Refresh priority
         }
     }
 
@@ -230,6 +255,15 @@ public partial class MainWindow : Window
     }
 
     private void Exit_Click(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
+    
+    private void CaptureCheckBox_Click(object sender, RoutedEventArgs e)
+    {
+        uint affinity = (CaptureCheckBox.IsChecked == true) ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE;
+        
+        // CheckBox now only toggles visibility of the Control Panel (Menu) in recordings
+        SetWindowDisplayAffinity(new WindowInteropHelper(this).Handle, affinity);
+    }
+
     private void ControlPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (e.LeftButton == MouseButtonState.Pressed) this.DragMove();

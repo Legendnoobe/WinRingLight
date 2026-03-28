@@ -18,6 +18,11 @@ public partial class LightWindow : Window
     [DllImport("user32.dll")]
     private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
 
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
+
+    private const uint WDA_EXCLUDEFROMCAPTURE = 0x11;
+
     public LightWindow()
     {
         InitializeComponent();
@@ -30,6 +35,9 @@ public partial class LightWindow : Window
         var helper = new WindowInteropHelper(this);
         int exStyle = GetWindowLong(helper.Handle, GWL_EXSTYLE);
         SetWindowLong(helper.Handle, GWL_EXSTYLE, exStyle | WS_EX_TRANSPARENT | WS_EX_LAYERED);
+
+        // Permanent Fix for Black Screen (V25): Always exclude the maximized light surface from capture
+        SetWindowDisplayAffinity(helper.Handle, WDA_EXCLUDEFROMCAPTURE);
     }
 
     public void UpdateLight(string mode, Color color, double thickness, double opacity, double softness, double cornerRadius)

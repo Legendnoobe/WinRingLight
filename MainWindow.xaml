@@ -7,11 +7,13 @@
         mc:Ignorable="d"
         Title="WinRingLight" 
         WindowStyle="None" 
-        WindowState="Maximized" 
-        Topmost="True" 
-        ResizeMode="NoResize"
         AllowsTransparency="True"
         Background="Transparent"
+        Topmost="True" 
+        SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize"
+        ShowInTaskbar="True"
+        WindowStartupLocation="Manual"
         FontFamily="Segoe UI Variable Text, Segoe UI, Tahoma"
         KeyDown="Window_KeyDown">
     
@@ -50,6 +52,43 @@
             </Setter>
         </Style>
 
+        <!-- Windows 11 style CheckBox -->
+        <Style x:Key="WindowsCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#FFFFFFFF"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="8,0,0,0"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <BulletDecorator Background="Transparent">
+                            <BulletDecorator.Bullet>
+                                <Border x:Name="border" Width="18" Height="18" CornerRadius="4" 
+                                        Background="#2D2D2D" BorderBrush="#404040" BorderThickness="1">
+                                    <Path x:Name="checkMark" Data="M1,4.5 L4.5,8 L10,1" 
+                                          Stroke="#FFFFFF" StrokeThickness="2" 
+                                          Margin="3" Visibility="Collapsed"/>
+                                </Border>
+                            </BulletDecorator.Bullet>
+                            <ContentPresenter Margin="{TemplateBinding Padding}" 
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </BulletDecorator>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#0078D4"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#0078D4"/>
+                                <Setter TargetName="checkMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#66FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="ModeButtonStyle" TargetType="Button" BasedOn="{StaticResource WindowsButtonStyle}">
             <Setter Property="Width" Value="65"/>
             <Setter Property="Height" Value="38"/>
@@ -57,117 +96,115 @@
         </Style>
     </Window.Resources>
 
-    <Grid x:Name="RootGrid" Background="Transparent" MouseLeftButtonDown="WindowGrid_MouseLeftButtonDown">
-        <!-- The Window is now just a transparent host for the Control Panel -->
+    <!-- Control Panel (Floating) -->
+    <Border x:Name="ControlPanel" 
+            Margin="20" 
+            Background="#EE1A1A1A" 
+            BorderBrush="#44FFFFFF"
+            BorderThickness="1"
+            CornerRadius="12" 
+            Padding="20"
+            Width="520"
+            MouseLeftButtonDown="ControlPanel_MouseLeftButtonDown">
+        
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="40" Color="Black" Opacity="0.4" ShadowDepth="0"/>
+        </Border.Effect>
+        
+        <StackPanel Orientation="Vertical">
+            <Grid Margin="0,0,0,12">
+                <StackPanel Orientation="Horizontal">
+                    <Viewbox Width="24" Height="24" Margin="0,0,8,0">
+                        <UniformGrid Columns="2" Rows="2">
+                            <Border Background="#FFFFE0" CornerRadius="2" Margin="1" Width="10" Height="10"/>
+                            <Border Background="#FFFFE0" CornerRadius="2" Margin="1" Width="10" Height="10"/>
+                            <Border Background="#FFFFE0" CornerRadius="2" Margin="1" Width="10" Height="10"/>
+                            <Border Background="#FFFFE0" CornerRadius="2" Margin="1" Width="10" Height="10"/>
+                        </UniformGrid>
+                    </Viewbox>
+                    <TextBlock x:Name="TitleText" Text="Windows RingLight" FontSize="16" FontWeight="SemiBold" Foreground="#FFFFFFFF" VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="LangBtn" Content="TR" Click="SwitchLanguage_Click" Background="Transparent" BorderThickness="0" Foreground="#AAFFFFFF" FontSize="11" Margin="0,0,10,0"/>
+                    <Button x:Name="ExitBtn" Content="Exit" Click="Exit_Click" Background="Transparent" BorderThickness="0" Foreground="#AAFFFFFF" FontSize="11"/>
+                </StackPanel>
+            </Grid>
+            
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
 
-        <!-- Control Panel (Dark Mode) -->
-        <Border x:Name="ControlPanel" 
-                VerticalAlignment="Bottom" 
-                HorizontalAlignment="Center" 
-                Margin="0,0,0,50" 
-                Background="#EE1A1A1A" 
-                BorderBrush="#44FFFFFF"
-                BorderThickness="1"
-                CornerRadius="12" 
-                Padding="20"
-                Width="520"
-                MouseLeftButtonDown="ControlPanel_MouseLeftButtonDown">
-            
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="40" Color="Black" Opacity="0.4" ShadowDepth="0"/>
-            </Border.Effect>
-            
-            <StackPanel Orientation="Vertical">
-                <Grid Margin="0,0,0,12">
-                    <StackPanel Orientation="Horizontal">
-                        <!-- Recreating the logo from user image in XAML -->
-                        <Viewbox Width="24" Height="24" Margin="0,0,8,0">
-                            <UniformGrid Columns="2" Rows="2">
-                                <Border Background="#FFFFE0" CornerRadius="2" Margin="1" Width="10" Height="10"/>
-                                <Border Background="#FFFFE0" CornerRadius="2" Margin="1" Width="10" Height="10"/>
-                                <Border Background="#FFFFE0" CornerRadius="2" Margin="1" Width="10" Height="10"/>
-                                <Border Background="#FFFFE0" CornerRadius="2" Margin="1" Width="10" Height="10"/>
-                            </UniformGrid>
-                        </Viewbox>
-                        <TextBlock x:Name="TitleText" Text="Windows RingLight" FontSize="16" FontWeight="SemiBold" Foreground="#FFFFFFFF" VerticalAlignment="Center"/>
+                <!-- Left: Colors & Basic Controls -->
+                <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                    <TextBlock x:Name="ColorText" Text="Color Temperature" FontSize="11" Foreground="#99FFFFFF" Margin="0,0,0,6"/>
+                    
+                    <Grid Margin="0,0,0,10">
+                        <Border Height="4" VerticalAlignment="Center" CornerRadius="2" Margin="5,0">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#FFFFA4" Offset="0"/>
+                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                    <GradientStop Color="#58B0FF" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <Slider x:Name="ColorSlider" Minimum="0" Maximum="1" Value="0.5" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center"/>
+                    </Grid>
+                    
+                    <StackPanel x:Name="BrightnessGroup">
+                        <TextBlock x:Name="BrightnessText" Text="Brightness (Dimmer)" FontSize="10" Foreground="#66FFFFFF" Margin="0,4,0,2"/>
+                        <Slider x:Name="BrightnessSlider" Minimum="0" Maximum="0.9" Value="0.9" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
                     </StackPanel>
                     
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button x:Name="LangBtn" Content="TR" Click="SwitchLanguage_Click" Background="Transparent" BorderThickness="0" Foreground="#AAFFFFFF" FontSize="11" Margin="0,0,10,0"/>
-                        <Button x:Name="ExitBtn" Content="Exit" Click="Exit_Click" Background="Transparent" BorderThickness="0" Foreground="#AAFFFFFF" FontSize="11"/>
-                    </StackPanel>
-                </Grid>
-                
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="3*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Left: Colors & Basic Controls -->
-                    <StackPanel Grid.Column="0" Margin="0,0,15,0">
-                        <TextBlock x:Name="ColorText" Text="Color Temperature" FontSize="11" Foreground="#99FFFFFF" Margin="0,0,0,6"/>
-                        
-                        <Grid Margin="0,0,0,10">
-                            <Border Height="4" VerticalAlignment="Center" CornerRadius="2" Margin="5,0">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                        <GradientStop Color="#FFFFA4" Offset="0"/>
-                                        <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                        <GradientStop Color="#58B0FF" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
-                            </Border>
-                            <Slider x:Name="ColorSlider" Minimum="0" Maximum="1" Value="0.5" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center"/>
-                        </Grid>
-                        
-                        <StackPanel x:Name="BrightnessGroup">
-                            <TextBlock x:Name="BrightnessText" Text="Brightness (Dimmer)" FontSize="10" Foreground="#66FFFFFF" Margin="0,4,0,2"/>
-                            <Slider x:Name="BrightnessSlider" Minimum="0" Maximum="0.9" Value="0.9" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
-                        </StackPanel>
-                        
-                        <StackPanel x:Name="OpacityGroup">
-                            <TextBlock x:Name="OpacityText" Text="Intensity (Solid)" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
-                            <Slider x:Name="OpacitySlider" Minimum="0" Maximum="1.0" Value="1.0" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
-                        </StackPanel>
-
-                        <StackPanel x:Name="SoftnessGroup">
-                            <TextBlock x:Name="SoftnessText" Text="Softness (Blur)" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
-                            <Slider x:Name="SoftnessSlider" Minimum="0" Maximum="1" Value="0.1" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
-                        </StackPanel>
+                    <StackPanel x:Name="OpacityGroup">
+                        <TextBlock x:Name="OpacityText" Text="Intensity (Solid)" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
+                        <Slider x:Name="OpacitySlider" Minimum="0" Maximum="1.0" Value="1.0" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
                     </StackPanel>
 
-                    <!-- Right: Advanced Modes & Size -->
-                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                        <TextBlock x:Name="ModesText" Text="Light Mode &amp; Size" FontSize="11" Foreground="#99FFFFFF" Margin="0,0,0,6"/>
-                        <UniformGrid Columns="5" Margin="0,0,0,12">
-                            <Button x:Name="ModeFullBtn" Content="Full" Click="Mode_Click" Tag="Full" Style="{StaticResource ModeButtonStyle}"/>
-                            <Button x:Name="ModeSidesBtn" Content="Sides" Click="Mode_Click" Tag="Sides" Style="{StaticResource ModeButtonStyle}"/>
-                            <Button x:Name="ModeTopBtn" Content="Top" Click="Mode_Click" Tag="Top" Style="{StaticResource ModeButtonStyle}"/>
-                            <Button x:Name="ModeRingBtn" Content="Ring" Click="Mode_Click" Tag="Ring" Style="{StaticResource ModeButtonStyle}"/>
-                            <Button x:Name="ModeRectBtn" Content="Frame" Click="Mode_Click" Tag="RoundedRect" Style="{StaticResource ModeButtonStyle}"/>
-                        </UniformGrid>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel x:Name="ThicknessGroup" Margin="0,0,5,0">
-                                <TextBlock x:Name="ThicknessText" Text="Thickness" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
-                                <Slider x:Name="ThicknessSlider" Minimum="0.05" Maximum="1.0" Value="0.4" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged"/>
-                            </StackPanel>
-                            <StackPanel x:Name="CornerGroup" Grid.Column="1" Margin="5,0,0,0">
-                                <TextBlock x:Name="CornerText" Text="Corner Radius" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
-                                <Slider x:Name="CornerRadiusSlider" Minimum="0" Maximum="1.0" Value="0.2" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged"/>
-                            </StackPanel>
-                        </Grid>
+                    <StackPanel x:Name="SoftnessGroup">
+                        <TextBlock x:Name="SoftnessText" Text="Softness (Blur)" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
+                        <Slider x:Name="SoftnessSlider" Minimum="0" Maximum="1" Value="0.1" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,8"/>
                     </StackPanel>
-                </Grid>
+                </StackPanel>
 
-                <Separator Background="#22FFFFFF" Margin="0,15,0,10"/>
-                <TextBlock x:Name="ShortcutText" Text="Shortcuts: 'H' (Hide), 'Esc' (Exit) | Click-through active" FontSize="10" Foreground="#44FFFFFF" HorizontalAlignment="Center"/>
-            </StackPanel>
-        </Border>
-    </Grid>
+                <!-- Right: Advanced Modes & Size -->
+                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                    <TextBlock x:Name="ModesText" Text="Light Mode &amp; Size" FontSize="11" Foreground="#99FFFFFF" Margin="0,0,0,6"/>
+                    <UniformGrid Columns="5" Margin="0,0,0,12">
+                        <Button x:Name="ModeFullBtn" Content="Full" Click="Mode_Click" Tag="Full" Style="{StaticResource ModeButtonStyle}"/>
+                        <Button x:Name="ModeSidesBtn" Content="Sides" Click="Mode_Click" Tag="Sides" Style="{StaticResource ModeButtonStyle}"/>
+                        <Button x:Name="ModeTopBtn" Content="Top" Click="Mode_Click" Tag="Top" Style="{StaticResource ModeButtonStyle}"/>
+                        <Button x:Name="ModeRingBtn" Content="Ring" Click="Mode_Click" Tag="Ring" Style="{StaticResource ModeButtonStyle}"/>
+                        <Button x:Name="ModeRectBtn" Content="Frame" Click="Mode_Click" Tag="RoundedRect" Style="{StaticResource ModeButtonStyle}"/>
+                    </UniformGrid>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel x:Name="ThicknessGroup" Margin="0,0,5,0">
+                            <TextBlock x:Name="ThicknessText" Text="Thickness" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
+                            <Slider x:Name="ThicknessSlider" Minimum="0.05" Maximum="1.0" Value="0.4" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged"/>
+                        </StackPanel>
+                        <StackPanel x:Name="CornerGroup" Grid.Column="1" Margin="5,0,0,0">
+                            <TextBlock x:Name="CornerText" Text="Corner Radius" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
+                            <Slider x:Name="CornerRadiusSlider" Minimum="0" Maximum="1.0" Value="0.2" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+
+            <CheckBox x:Name="CaptureCheckBox" Content="Hide from Screen Capture" 
+                      Style="{StaticResource WindowsCheckBoxStyle}" 
+                      Click="CaptureCheckBox_Click" 
+                      HorizontalAlignment="Center" Margin="0,10,0,0"/>
+
+            <Separator Background="#22FFFFFF" Margin="0,15,0,10"/>
+            <TextBlock x:Name="ShortcutText" Text="Shortcuts: 'Alt+H' (Panel), 'Alt+L' (Light), 'Esc' (Exit)" FontSize="10" Foreground="#44FFFFFF" HorizontalAlignment="Center"/>
+        </StackPanel>
+    </Border>
 </Window>
