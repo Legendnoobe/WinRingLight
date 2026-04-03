@@ -14,6 +14,11 @@ public partial class MainWindow : Window
     private string _currentLang = "EN";
     private string _currentMode = "Ring";
     private LightWindow _lightWindow;
+    private Color? _currentMatrixBrushColor = null;
+    
+    private bool _isDraggingColorMap = false;
+    private double _currentSaturation = 1.0;
+    private double _currentValue = 1.0;
 
     // Global Hotkey (V20)
     [DllImport("user32.dll")]
@@ -60,6 +65,8 @@ public partial class MainWindow : Window
         source.AddHook(HwndHook);
 
         _isInitialized = true;
+        _isInitialized = true;
+        BuildMatrixGrid((int)MatrixRowsSlider.Value, (int)MatrixColsSlider.Value);
         SetMode("Ring"); 
         UpdateLanguage();
         SyncLight();
@@ -97,22 +104,66 @@ public partial class MainWindow : Window
         base.OnClosed(e);
     }
 
+     private Color GetCurrentSliderColor()
+    {
+        double val = ColorSlider.Value;
+        
+        if (RgbModeCheckBox != null && RgbModeCheckBox.IsChecked == true)
+        {
+            double hue = HueSlider.Value;
+            return ColorFromHSV(hue, _currentSaturation, _currentValue);
+        }
+        else
+        {
+            Color warm = (Color)ColorConverter.ConvertFromString("#FFFFA4");
+            Color neutral = (Color)ColorConverter.ConvertFromString("#FFFFFF");
+            Color cool = (Color)ColorConverter.ConvertFromString("#58B0FF");
+            if (val < 0.5) {
+                double t = val * 2;
+                return Interpolate(warm, neutral, t);
+            } else {
+                double t = (val - 0.5) * 2;
+                return Interpolate(neutral, cool, t);
+            }
+        }
+    }
+
+    private Color ColorFromHSV(double hue, double saturation, double value)
+    {
+        int hi = Convert.ToInt32(Math.Floor(hue / 60)) % 6;
+        double f = hue / 60 - Math.Floor(hue / 60);
+
+        value = value * 255;
+        int v = Convert.ToInt32(value);
+        int p = Convert.ToInt32(value * (1 - saturation));
+        int q = Convert.ToInt32(value * (1 - f * saturation));
+        int t = Convert.ToInt32(value * (1 - (1 - f) * saturation));
+
+        if (hi == 0) return Color.FromArgb(255, (byte)v, (byte)t, (byte)p);
+        else if (hi == 1) return Color.FromArgb(255, (byte)q, (byte)v, (byte)p);
+        else if (hi == 2) return Color.FromArgb(255, (byte)p, (byte)v, (byte)t);
+        else if (hi == 3) return Color.FromArgb(255, (byte)p, (byte)q, (byte)v);
+        else if (hi == 4) return Color.FromArgb(255, (byte)t, (byte)p, (byte)v);
+        else return Color.FromArgb(255, (byte)v, (byte)p, (byte)q);
+    }
+
     private void SyncLight()
     {
         if (!_isInitialized || _lightWindow == null) return;
 
-        Color warm = (Color)ColorConverter.ConvertFromString("#FFFFA4");
-        Color neutral = (Color)ColorConverter.ConvertFromString("#FFFFFF");
-        Color cool = (Color)ColorConverter.ConvertFromString("#58B0FF");
+        Color result = GetCurrentSliderColor();
 
-        double val = ColorSlider.Value;
-        Color result;
-        if (val < 0.5) {
-            double t = val * 2;
-            result = Interpolate(warm, neutral, t);
-        } else {
-            double t = (val - 0.5) * 2;
-            result = Interpolate(neutral, cool, t);
+        Color?[] matrixData = null;
+        if (_currentMode == "Matrix" && MatrixPreviewGrid != null)
+        {
+            matrixData = new Color?[MatrixPreviewGrid.Children.Count];
+            for (int i = 0; i < MatrixPreviewGrid.Children.Count; i++)
+            {
+                if (MatrixPreviewGrid.Children[i] is Button btn && btn.Tag is Color c)
+                {
+                    matrixData[i] = c;
+                }
+            }
         }
 
         _lightWindow.UpdateLight(
@@ -121,7 +172,10 @@ public partial class MainWindow : Window
             ThicknessSlider.Value,
             OpacitySlider.Value,
             SoftnessSlider.Value,
-            CornerRadiusSlider.Value
+            CornerRadiusSlider.Value,
+            (int)MatrixRowsSlider.Value,
+            (int)MatrixColsSlider.Value,
+            matrixData
         );
 
         int sysBrightness = (int)(BrightnessSlider.Value / 0.9 * 100);
@@ -147,7 +201,7 @@ public partial class MainWindow : Window
             TitleText.Text = "Windows RingLight";
             LangBtn.Content = "TR";
             ExitBtn.Content = "Exit";
-            ColorText.Text = "Color Temperature";
+            ColorText.Text = "Main Colors";
             BrightnessText.Text = "Brightness (Dimmer)";
             OpacityText.Text = "Intensity (Solid)"; 
             SoftnessText.Text = "Softness (Glow)"; 
@@ -157,8 +211,12 @@ public partial class MainWindow : Window
             ModeTopBtn.Content = "Top";
             ModeRingBtn.Content = "Ring";
             ModeRectBtn.Content = "Frame";
+            if (ModeMatrixBtn != null) ModeMatrixBtn.Content = "Matrix";
             ThicknessText.Text = "Thickness";
             CornerText.Text = "Corner Radius";
+            if (MatrixRowsText != null) MatrixRowsText.Text = $"Rows: {(int)MatrixRowsSlider.Value}";
+            MatrixColsText.Text = $"Cols: {(int)MatrixColsSlider.Value}";
+            if (MatrixBrushBtn != null) MatrixBrushBtn.Content = "Set Brush Color";
             CaptureCheckBox.Content = "Hide from Screen Capture";
             ShortcutText.Text = "Shortcuts: 'Alt+H' (Panel), 'Alt+L' (Light), 'Esc' (Exit)";
         }
@@ -167,7 +225,7 @@ public partial class MainWindow : Window
             TitleText.Text = "Windows RingLight";
             LangBtn.Content = "EN";
             ExitBtn.Content = "Kapat";
-            ColorText.Text = "Renk Sıcaklığı";
+            ColorText.Text = "Gelişmiş Renkler";
             BrightnessText.Text = "Parlaklık (Dimmer)";
             OpacityText.Text = "Işık Şiddeti (Matlık)"; 
             SoftnessText.Text = "Yumuşaklık (Işıltı)"; 
@@ -177,8 +235,12 @@ public partial class MainWindow : Window
             ModeTopBtn.Content = "Üst";
             ModeRingBtn.Content = "Halka";
             ModeRectBtn.Content = "Çerçeve";
+            if (ModeMatrixBtn != null) ModeMatrixBtn.Content = "Bölge";
             ThicknessText.Text = "Kalınlık";
             CornerText.Text = "Köşe Kavisi";
+            if (MatrixRowsText != null) MatrixRowsText.Text = $"Satır: {(int)MatrixRowsSlider.Value}";
+            MatrixColsText.Text = $"Sütun: {(int)MatrixColsSlider.Value}";
+            if (MatrixBrushBtn != null) MatrixBrushBtn.Content = "Bölge Rengini Ata";
             CaptureCheckBox.Content = "Ekran Kaydında Gizle";
             ShortcutText.Text = "Kısayollar: 'Alt+H' (Panel), 'Alt+L' (Işık), 'Esc' (Çıkış)";
         }
@@ -241,6 +303,7 @@ public partial class MainWindow : Window
         if (ThicknessGroup != null) ThicknessGroup.Visibility = Visibility.Visible;
         if (SoftnessGroup != null) SoftnessGroup.Visibility = Visibility.Visible;
         if (CornerGroup != null) CornerGroup.Visibility = Visibility.Collapsed;
+        if (MatrixGroup != null) MatrixGroup.Visibility = Visibility.Collapsed;
 
         switch (_currentMode)
         {
@@ -251,7 +314,159 @@ public partial class MainWindow : Window
             case "RoundedRect":
                 if (CornerGroup != null) CornerGroup.Visibility = Visibility.Visible;
                 break;
+            case "Matrix":
+                if (ThicknessGroup != null) ThicknessGroup.Visibility = Visibility.Collapsed;
+                if (CornerGroup != null) CornerGroup.Visibility = Visibility.Collapsed;
+                if (MatrixGroup != null) MatrixGroup.Visibility = Visibility.Visible;
+                // SoftnessGroup stays visible for nice blur
+                break;
         }
+    }
+
+    private void MatrixSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (!_isInitialized || MatrixPreviewGrid == null) return;
+        
+        int rows = (int)MatrixRowsSlider.Value;
+        int cols = (int)MatrixColsSlider.Value;
+        
+        if (MatrixRowsText != null) 
+            MatrixRowsText.Text = _currentLang == "EN" ? $"Rows: {rows}" : $"Satır: {rows}";
+        if (MatrixColsText != null) 
+            MatrixColsText.Text = _currentLang == "EN" ? $"Cols: {cols}" : $"Sütun: {cols}";
+
+        if (MatrixPreviewGrid.Rows != rows || MatrixPreviewGrid.Columns != cols)
+        {
+            MatrixPreviewGrid.Rows = rows;
+            MatrixPreviewGrid.Columns = cols;
+            BuildMatrixGrid(rows, cols);
+            SyncLight();
+        }
+    }
+
+    private void BuildMatrixGrid(int rows, int cols)
+    {
+        if (MatrixPreviewGrid == null) return;
+        MatrixPreviewGrid.Children.Clear();
+        int count = rows * cols;
+        for (int i = 0; i < count; i++)
+        {
+            Button btn = new Button
+            {
+                Margin = new Thickness(1),
+                Background = Brushes.Transparent,
+                BorderBrush = new SolidColorBrush(Color.FromArgb(80, 255, 255, 255)),
+                BorderThickness = new Thickness(1),
+                Style = null // override defaults
+            };
+            btn.Click += MatrixBlock_Click;
+            MatrixPreviewGrid.Children.Add(btn);
+        }
+    }
+
+    private void MatrixBlock_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn)
+        {
+            if (btn.Tag != null)
+            {
+                btn.Tag = null;
+                btn.Background = Brushes.Transparent;
+            }
+            else
+            {
+                Color c = _currentMatrixBrushColor.HasValue ? _currentMatrixBrushColor.Value : GetCurrentSliderColor();
+                btn.Tag = c;
+                btn.Background = new SolidColorBrush(c);
+            }
+            SyncLight();
+        }
+    }
+
+    private void MatrixBrushBtn_Click(object sender, RoutedEventArgs e)
+    {
+        _currentMatrixBrushColor = GetCurrentSliderColor();
+        MatrixBrushBtn.Background = new SolidColorBrush(_currentMatrixBrushColor.Value);
+    }
+
+    private void RgbModeCheckBox_Click(object sender, RoutedEventArgs e)
+    {
+        if (RgbModeCheckBox.IsChecked == true)
+        {
+            WhiteLightGrid.Visibility = Visibility.Collapsed;
+            RgbPickerGrid.Visibility = Visibility.Visible;
+            if (ColorThumbTransform != null && ColorMapGrid.ActualWidth > 0 && ColorMapGrid.ActualHeight > 0)
+            {
+                _currentSaturation = Math.Clamp((ColorThumbTransform.X + 6) / ColorMapGrid.ActualWidth, 0, 1);
+                _currentValue = 1.0 - Math.Clamp((ColorThumbTransform.Y + 6) / ColorMapGrid.ActualHeight, 0, 1);
+            }
+        }
+        else
+        {
+            WhiteLightGrid.Visibility = Visibility.Visible;
+            RgbPickerGrid.Visibility = Visibility.Collapsed;
+        }
+        SyncLight();
+    }
+
+    private void HueSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (!_isInitialized) return;
+        Color baseHue = ColorFromHSV(HueSlider.Value, 1.0, 1.0);
+        if (ColorMapHueLayer != null) ColorMapHueLayer.Background = new SolidColorBrush(baseHue);
+        SyncLight();
+    }
+
+    private void ColorMap_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _isDraggingColorMap = true;
+        ColorMapGrid.CaptureMouse();
+        UpdateColorMapSelection(e.GetPosition(ColorMapGrid));
+        e.Handled = true; // Prevent window from dragging
+    }
+
+    private void ColorMap_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (_isDraggingColorMap)
+        {
+            UpdateColorMapSelection(e.GetPosition(ColorMapGrid));
+        }
+    }
+
+    private void ColorMap_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_isDraggingColorMap)
+        {
+            _isDraggingColorMap = false;
+            ColorMapGrid.ReleaseMouseCapture();
+        }
+    }
+
+    private void ColorMap_LostMouseCapture(object sender, MouseEventArgs e)
+    {
+        _isDraggingColorMap = false;
+    }
+
+    private void UpdateColorMapSelection(Point p)
+    {
+        double width = ColorMapGrid.ActualWidth;
+        double height = ColorMapGrid.ActualHeight;
+
+        if (width <= 0 || height <= 0) return;
+
+        double x = Math.Clamp(p.X, 0, width);
+        double y = Math.Clamp(p.Y, 0, height);
+
+        if (ColorThumbTransform != null && ColorMapThumb != null)
+        {
+            ColorThumbTransform.X = x - (ColorMapThumb.Width / 2);
+            ColorThumbTransform.Y = y - (ColorMapThumb.Height / 2);
+        }
+
+        _currentSaturation = x / width;
+        _currentValue = 1.0 - (y / height);
+
+        SyncLight();
     }
 
     private void Exit_Click(object sender, RoutedEventArgs e) => Application.Current.Shutdown();

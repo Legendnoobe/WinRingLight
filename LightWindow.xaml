@@ -51,6 +51,8 @@
                     </CombinedGeometry>
                 </Path.Data>
             </Path>
+
+            <UniformGrid x:Name="MatrixMode" Visibility="Collapsed" Margin="20"/>
         </Grid>
         
     </Grid>

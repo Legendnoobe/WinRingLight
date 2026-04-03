@@ -40,13 +40,14 @@ public partial class LightWindow : Window
         SetWindowDisplayAffinity(helper.Handle, WDA_EXCLUDEFROMCAPTURE);
     }
 
-    public void UpdateLight(string mode, Color color, double thickness, double opacity, double softness, double cornerRadius)
+    public void UpdateLight(string mode, Color color, double thickness, double opacity, double softness, double cornerRadius, int matrixRows = 3, int matrixCols = 3, Color?[] matrixData = null)
     {
         FullMode.Visibility = (mode == "Full") ? Visibility.Visible : Visibility.Collapsed;
         SidesMode.Visibility = (mode == "Sides") ? Visibility.Visible : Visibility.Collapsed;
         TopMode.Visibility = (mode == "Top") ? Visibility.Visible : Visibility.Collapsed;
         RingMode.Visibility = (mode == "Ring") ? Visibility.Visible : Visibility.Collapsed;
         RoundedRectMode.Visibility = (mode == "RoundedRect") ? Visibility.Visible : Visibility.Collapsed;
+        MatrixMode.Visibility = (mode == "Matrix") ? Visibility.Visible : Visibility.Collapsed;
 
         var brush = new SolidColorBrush(color);
         FullMode.Fill = brush;
@@ -55,6 +56,33 @@ public partial class LightWindow : Window
         TopMode.Fill = brush;
         RingMode.Fill = brush;
         RoundedRectMode.Fill = brush;
+
+        if (mode == "Matrix" && matrixData != null)
+        {
+            if (MatrixMode.Rows != matrixRows || MatrixMode.Columns != matrixCols)
+            {
+                MatrixMode.Rows = matrixRows;
+                MatrixMode.Columns = matrixCols;
+                MatrixMode.Children.Clear();
+                int count = matrixRows * matrixCols;
+                for (int i = 0; i < count; i++)
+                {
+                    MatrixMode.Children.Add(new System.Windows.Shapes.Rectangle 
+                    { 
+                        Fill = Brushes.Transparent,
+                        Margin = new Thickness(10) // small gap between matrix regions
+                    });
+                }
+            }
+
+            for (int i = 0; i < matrixData.Length && i < MatrixMode.Children.Count; i++)
+            {
+                if (MatrixMode.Children[i] is System.Windows.Shapes.Rectangle rect)
+                {
+                    rect.Fill = matrixData[i].HasValue ? new SolidColorBrush(matrixData[i].Value) : Brushes.Transparent;
+                }
+            }
+        }
 
         LightContainer.Opacity = opacity;
         LightBlur.Radius = softness * 120;

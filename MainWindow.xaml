@@ -139,19 +139,77 @@
 
                 <!-- Left: Colors & Basic Controls -->
                 <StackPanel Grid.Column="0" Margin="0,0,15,0">
-                    <TextBlock x:Name="ColorText" Text="Color Temperature" FontSize="11" Foreground="#99FFFFFF" Margin="0,0,0,6"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <TextBlock x:Name="ColorText" Text="Colors" FontSize="11" Foreground="#99FFFFFF" VerticalAlignment="Center"/>
+                        <CheckBox x:Name="RgbModeCheckBox" Content="RGB" IsChecked="False" Foreground="#99FFFFFF" FontSize="10" Margin="10,0,0,0" VerticalAlignment="Center" Click="RgbModeCheckBox_Click"/>
+                    </StackPanel>
                     
-                    <Grid Margin="0,0,0,10">
-                        <Border Height="4" VerticalAlignment="Center" CornerRadius="2" Margin="5,0">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                    <GradientStop Color="#FFFFA4" Offset="0"/>
-                                    <GradientStop Color="#FFFFFF" Offset="0.5"/>
-                                    <GradientStop Color="#58B0FF" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                        </Border>
-                        <Slider x:Name="ColorSlider" Minimum="0" Maximum="1" Value="0.5" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center"/>
+                    <Grid x:Name="ColorModesContainer">
+                        <Grid x:Name="WhiteLightGrid" Margin="0,0,0,10" Visibility="Visible">
+                            <Border Height="4" VerticalAlignment="Center" CornerRadius="2" Margin="5,0">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#FFFFA4" Offset="0"/>
+                                        <GradientStop Color="#FFFFFF" Offset="0.5"/>
+                                        <GradientStop Color="#58B0FF" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
+                            <Slider x:Name="ColorSlider" Minimum="0" Maximum="1" Value="0.5" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <Grid x:Name="RgbPickerGrid" Margin="5,0,5,10" Visibility="Collapsed" Height="90">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="18"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Color Map (Saturation & Value) -->
+                            <Grid x:Name="ColorMapGrid" MouseLeftButtonDown="ColorMap_MouseLeftButtonDown" MouseMove="ColorMap_MouseMove" MouseLeftButtonUp="ColorMap_MouseLeftButtonUp" LostMouseCapture="ColorMap_LostMouseCapture" Background="Transparent">
+                                <Border x:Name="ColorMapHueLayer" Background="Red" CornerRadius="4,4,0,0"/>
+                                <Border CornerRadius="4,4,0,0">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#FFFFFFFF" Offset="0"/>
+                                            <GradientStop Color="#00FFFFFF" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                                <Border CornerRadius="4,4,0,0">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                                            <GradientStop Color="#FF000000" Offset="0"/>
+                                            <GradientStop Color="#00000000" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                                <Canvas x:Name="ColorMapCanvas" ClipToBounds="True" IsHitTestVisible="False">
+                                    <Ellipse x:Name="ColorMapThumb" Width="12" Height="12" Stroke="White" StrokeThickness="1.5" Fill="Transparent">
+                                        <Ellipse.RenderTransform>
+                                            <TranslateTransform x:Name="ColorThumbTransform" X="100" Y="0" />
+                                        </Ellipse.RenderTransform>
+                                    </Ellipse>
+                                </Canvas>
+                            </Grid>
+
+                            <!-- Hue Slider -->
+                            <Grid Grid.Row="1" Margin="0,5,0,0">
+                                <Border Height="6" VerticalAlignment="Center" CornerRadius="3" Margin="5,0">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#FFFF0000" Offset="0.0"/>
+                                            <GradientStop Color="#FFFFFF00" Offset="0.166"/>
+                                            <GradientStop Color="#FF00FF00" Offset="0.333"/>
+                                            <GradientStop Color="#FF00FFFF" Offset="0.5"/>
+                                            <GradientStop Color="#FF0000FF" Offset="0.666"/>
+                                            <GradientStop Color="#FFFF00FF" Offset="0.833"/>
+                                            <GradientStop Color="#FFFF0000" Offset="1.0"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                                <Slider x:Name="HueSlider" Minimum="0" Maximum="360" Value="0" IsMoveToPointEnabled="True" ValueChanged="HueSlider_ValueChanged" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Grid>
                     </Grid>
                     
                     <StackPanel x:Name="BrightnessGroup">
@@ -173,12 +231,13 @@
                 <!-- Right: Advanced Modes & Size -->
                 <StackPanel Grid.Column="1" Margin="10,0,0,0">
                     <TextBlock x:Name="ModesText" Text="Light Mode &amp; Size" FontSize="11" Foreground="#99FFFFFF" Margin="0,0,0,6"/>
-                    <UniformGrid Columns="5" Margin="0,0,0,12">
+                    <UniformGrid Columns="3" Margin="0,0,0,12">
                         <Button x:Name="ModeFullBtn" Content="Full" Click="Mode_Click" Tag="Full" Style="{StaticResource ModeButtonStyle}"/>
                         <Button x:Name="ModeSidesBtn" Content="Sides" Click="Mode_Click" Tag="Sides" Style="{StaticResource ModeButtonStyle}"/>
                         <Button x:Name="ModeTopBtn" Content="Top" Click="Mode_Click" Tag="Top" Style="{StaticResource ModeButtonStyle}"/>
                         <Button x:Name="ModeRingBtn" Content="Ring" Click="Mode_Click" Tag="Ring" Style="{StaticResource ModeButtonStyle}"/>
                         <Button x:Name="ModeRectBtn" Content="Frame" Click="Mode_Click" Tag="RoundedRect" Style="{StaticResource ModeButtonStyle}"/>
+                        <Button x:Name="ModeMatrixBtn" Content="Matrix" Click="Mode_Click" Tag="Matrix" Style="{StaticResource ModeButtonStyle}"/>
                     </UniformGrid>
 
                     <Grid>
@@ -195,6 +254,27 @@
                             <Slider x:Name="CornerRadiusSlider" Minimum="0" Maximum="1.0" Value="0.2" IsMoveToPointEnabled="True" ValueChanged="Slider_ValueChanged"/>
                         </StackPanel>
                     </Grid>
+
+                    <StackPanel x:Name="MatrixGroup" Visibility="Collapsed" Margin="0,5,0,0">
+                        <Grid Margin="0,0,0,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,5,0">
+                                <TextBlock x:Name="MatrixRowsText" Text="Rows: 3" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
+                                <Slider x:Name="MatrixRowsSlider" Minimum="1" Maximum="10" Value="3" IsSnapToTickEnabled="True" TickFrequency="1" ValueChanged="MatrixSlider_ValueChanged"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                <TextBlock x:Name="MatrixColsText" Text="Cols: 3" FontSize="10" Foreground="#66FFFFFF" Margin="0,0,0,2"/>
+                                <Slider x:Name="MatrixColsSlider" Minimum="1" Maximum="10" Value="3" IsSnapToTickEnabled="True" TickFrequency="1" ValueChanged="MatrixSlider_ValueChanged"/>
+                            </StackPanel>
+                        </Grid>
+                        <Button x:Name="MatrixBrushBtn" Content="Set Brush Color" FontSize="10" Margin="0,0,0,5" Padding="4" HorizontalAlignment="Center" Style="{StaticResource WindowsButtonStyle}" Click="MatrixBrushBtn_Click"/>
+                        <Border BorderBrush="#44FFFFFF" BorderThickness="1" CornerRadius="4" Padding="2" HorizontalAlignment="Center" Height="100" Width="170">
+                            <UniformGrid x:Name="MatrixPreviewGrid" Rows="3" Columns="3"/>
+                        </Border>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
 
