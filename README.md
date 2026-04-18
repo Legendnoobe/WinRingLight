@@ -1,3 +1,6 @@
+> ⚠️ **Warning**
+> Be careful: This project partly uses AI agents.
+
 # WinRingLight
 
 [English](#english) | [Türkçe](#türkçe)
